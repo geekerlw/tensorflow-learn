@@ -44,7 +44,7 @@ for i in range(0, test_data.shape[0]//100):
 	predicted_labels[i*100: (i+1)*100] = predict.eval(feed_dict={x: test_data[i*100 : (i+1)*100]})
 
 
-np.savetxt('submission_softmax.csv',
+np.savetxt('submission.csv',
 			np.c_[range(1, len(test_data)+1), predicted_labels],
 			delimiter = ',',
 			header = 'ImageId,Label',
