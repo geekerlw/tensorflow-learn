@@ -5,13 +5,14 @@ import input_data
 
 mnist = input_data.read_data_sets(one_hot=True)
 
-x = tf.placeholder(tf.float32, [None, 784])
+x = tf.placeholder(tf.float32, [None, 28, 28, 1])
 y_ = tf.placeholder(tf.float32, [None, 10])
 
 w = tf.Variable(tf.zeros([784, 10]))
 b = tf.Variable(tf.zeros([10]))
 
-y = tf.nn.softmax(tf.matmul(x, w) + b)
+xx = tf.reshape(x, shape=[-1, 784])
+y = tf.nn.softmax(tf.matmul(xx, w) + b)
 
 cross_entropy = -tf.reduce_sum(y_*tf.log(y))
 
@@ -33,10 +34,9 @@ for i in range(20000):
 		print ("train_step => %d" % i)
 		print ("accuracy in this step is: %g" % accuracy_step)
 	sess.run(train_step, feed_dict={x: batch_x, y_: batch_y})
-	
-data = pd.read_csv("./data/test.csv")
-data = data.astype(np.float32)
-test_data = np.multiply(data, 1.0 / 255.0)
+
+# load test_data
+test_data = mnist.test.images
 
 predict = tf.argmax(y, 1)
 predicted_labels = np.zeros(test_data.shape[0])

@@ -8,7 +8,7 @@ mnist = input_data.read_data_sets(one_hot=True)
 
 # input X: 28x28 grayscale images, the first dimension (None) will index the images in the mini-batch
 # x = tf.placeholder(tf.float32, [None, 28, 28, 1])
-x = tf.placeholder(tf.float32, [None, 784])
+x = tf.placeholder(tf.float32, [None, 28, 28, 1])
 # correct answers will go here
 y_ = tf.placeholder(tf.float32, [None, 10])
 # variable learning rate
@@ -33,7 +33,8 @@ W5 = tf.Variable(tf.truncated_normal([O, 10], stddev=0.1))
 B5 = tf.Variable(tf.zeros([10]))
 
 # The model
-Y1 = tf.nn.relu(tf.matmul(x, W1) + B1)
+xx = tf.reshape(x, shape=[-1, 784])
+Y1 = tf.nn.relu(tf.matmul(xx, W1) + B1)
 Y2 = tf.nn.relu(tf.matmul(Y1, W2) + B2)
 Y3 = tf.nn.relu(tf.matmul(Y2, W3) + B3)
 Y4 = tf.nn.relu(tf.matmul(Y3, W4) + B4)
@@ -72,9 +73,8 @@ for i in range(20000):
 		print ("accuracy in this step is: %g" % accuracy_step)
 	sess.run(train_step, feed_dict={x: batch_x, y_: batch_y, lr: learning_rate})
 	
-data = pd.read_csv("./data/test.csv")
-data = data.astype(np.float32)
-test_data = np.multiply(data, 1.0 / 255.0)
+# load test_data
+test_data = mnist.test.images
 
 predict = tf.argmax(y, 1)
 predicted_labels = np.zeros(test_data.shape[0])
