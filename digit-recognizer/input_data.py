@@ -8,17 +8,34 @@ def dense_to_one_hot(labels_dense, num_classes):
     labels_one_hot.flat[index_offset + labels_dense.ravel()] = 1
     return labels_one_hot
 
-def train_images_get(filename):
-	# read training data from csv file
+def test_images_get(filename):
+	# read test data from csv file
 	file = pd.read_csv(filename)
 	# split and format data
-	data = file.iloc[:, 1:].values
+	data = file.iloc[:, 0:].values
+	# format data
 	data = data.astype(np.float32)
 	# convert from [0:255] to [0.0:1.0]
 	data = np.multiply(data, 1.0 / 255.0)
 	# get nums of data
 	image_nums = len(file[[0]].values.ravel())
-	#image_length = len(data[[0]].values.ravel())
+	image_size = data.shape[1]
+	image_width = image_height = np.ceil(np.sqrt(image_size)).astype(np.uint8)
+	images = data.reshape(image_nums, image_width, image_height, 1)
+	
+	return images
+	
+def train_images_get(filename):
+	# read training data from csv file
+	file = pd.read_csv(filename)
+	# split and format data
+	data = file.iloc[:, 1:].values
+	# format data
+	data = data.astype(np.float32)
+	# convert from [0:255] to [0.0:1.0]
+	data = np.multiply(data, 1.0 / 255.0)
+	# get nums of data
+	image_nums = len(file[[0]].values.ravel())
 	image_size = data.shape[1]
 	image_width = image_height = np.ceil(np.sqrt(image_size)).astype(np.uint8)
 	images = data.reshape(image_nums, image_width, image_height, 1)
@@ -41,17 +58,10 @@ def train_labels_get(filename, one_hot=False):
 	return labels
 
 class dataSet(object):
-	def __init__(self, images, labels):
-		assert images.shape[0] == labels.shape[0], (
-			"images.shape: %s labels.shape: %s" % (images.shape, labels.shape))
+	def __init__(self, images=None, labels=None):
+		#assert images.shape[0] == labels.shape[0], (
+		#	"images.shape: %s labels.shape: %s" % (images.shape, labels.shape))
 		self._num_examples = images.shape[0]
-		self.imageShape = images.shape[1:]
-		self.imageChannels = self.imageShape[2]
-	
-		images = images.reshape(images.shape[0],
-							images.shape[1] * images.shape[2] * images.shape[3])
-		images = images.astype(np.float32)
-		images = np.multiply(images, 1.0 / 255.0)
 		self._images = images
 		self._labels = labels
 		try:
@@ -97,18 +107,22 @@ class dataSet(object):
 		end = self._index_in_epoch
 		return self._images[start:end], self._labels[start:end]
 
-
+'''
+	images output like X[batch, wight, height, deepth]
+	labels output like Y[count]
+'''
 def read_data_sets(one_hot=False):
 	class dataSets(object):
 		pass
 	data_sets = dataSets()
 	
 	TRAIN_IMAGES = './data/train.csv'
-	TEST_IMAGES = './data/test.csv'
+	TESE_IMAGES = './data/test.csv'
 	VALIDATION_SIZE = 5000
 	
 	train_images = train_images_get(TRAIN_IMAGES)
 	train_labels = train_labels_get(TRAIN_IMAGES, one_hot=one_hot)
+	test_images = test_images_get(TESE_IMAGES)
 	
 	validation_images = train_images[:VALIDATION_SIZE]
 	validation_labels = train_labels[:VALIDATION_SIZE]
@@ -117,5 +131,6 @@ def read_data_sets(one_hot=False):
 	
 	data_sets.train = dataSet(train_images, train_labels)
 	data_sets.validation = dataSet(validation_images, validation_labels)
+	data_sets.test = dataSet(test_images)
 
 	return data_sets
