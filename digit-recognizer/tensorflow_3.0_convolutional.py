@@ -116,7 +116,8 @@ sess.run(init)
 for i in range(10000):
 	batch_x, batch_y = mnist.train.next_batch(100)
 	if i % 100 == 0:
-		accuracy_step = sess.run(accuracy, feed_dict={x: mnist.validation.images, y_: mnist.validation.labels, keep_prob: 1.0})
+		n = np.random.randint(0, 4000)
+		accuracy_step = sess.run(accuracy, feed_dict={x: mnist.validation.images[n: (n+100)], y_: mnist.validation.labels[n: (n+100)], keep_prob: 1.0})
 		print ("train_step => %d" % i)
 		print ("accuracy in this step is: %g" % accuracy_step)
 	sess.run(train_step, feed_dict={x: batch_x, y_: batch_y, keep_prob: 0.75})
